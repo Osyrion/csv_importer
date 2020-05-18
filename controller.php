@@ -1,10 +1,11 @@
 <?php
 
-/* VARIABLES */ 
+/* GLOBAL VARIABLES */ 
 $basePath = "http://127.0.0.1/php/";
 $password = "1234";
 $dbName = "testdb";
 $user = "robert";
+
 
 function OpenCon()
 {
