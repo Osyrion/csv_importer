@@ -1,9 +1,22 @@
 <?php
 // Load the database configuration file
-include_once 'dbConfig.php';
+include_once 'config.php';
 
-if(isset($_POST['importSubmit'])){
-    
+// UNIVERSAL PASSWORD FOR IMPORT FILE TO DB
+$universal_password = "1234";
+
+
+if(isset($_POST['action'])){
+
+if ($_POST['action'] == 'EXPORT') {
+    if ($_SERVER['REQUEST_METHOD']== "POST") {
+
+        if ($_POST['password'] != $universal_password) {
+            $qstring = '?status=nopass';
+            header("Location: index.php".$qstring);
+            exit();
+        }
+    }
     // Allowed mime types
     $csvMimes = array('text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain');
     
@@ -16,27 +29,31 @@ if(isset($_POST['importSubmit'])){
             // Open uploaded CSV file with read-only mode
             $csvFile = fopen($_FILES['file']['tmp_name'], 'r');
             
-            // Skip the first line
+            // Skip the first data
             fgetcsv($csvFile);
-            
-            // Parse data from CSV file line by line
-            while(($line = fgetcsv($csvFile)) !== FALSE){
-                // Get row data
-                $name   = $line[0];
-                $email  = $line[1];
-                $phone  = $line[2];
-                $status = $line[3];
+
+            // Parse data from CSV file data by data
+            while(($data = fgetcsv($csvFile, 1000, ";")) !== FALSE){
+
+                // COLUMNS
+                $payment_date = $data[13];
+                $amount = $data[33];
+
+                // CHECKING ENCODING
+                $check_encoding = mb_detect_encoding($data[11], 'auto');
+
+                if (mb_check_encoding($data, 'utf-8')) {
+                    // USE THIS IF CSV IS ALREADY IN UTF-8
+                    $comment = $data[11];
+                }
+                else {
+                    // CONVERT TO UTF-8
+                    $comment = iconv($check_encoding, 'utf-8', $data[11]);
+                }
                 
-                // Check whether member already exists in the database with the same email
-                $prevQuery = "SELECT id FROM members WHERE email = '".$line[1]."'";
-                $prevResult = $db->query($prevQuery);
-                
-                if($prevResult->num_rows > 0){
-                    // Update member data in the database
-                    $db->query("UPDATE members SET name = '".$name."', phone = '".$phone."', status = '".$status."', modified = NOW() WHERE email = '".$email."'");
-                }else{
-                    // Insert member data in the database
-                    $db->query("INSERT INTO members (name, email, phone, created, modified, status) VALUES ('".$name."', '".$email."', '".$phone."', NOW(), NOW(), '".$status."')");
+                // CHECKING IF AMOUNT IS NOT 0
+                if ($amount != 0) {
+                    $db->query("INSERT INTO CSV_IMPORT (payment_date, amount, comment) VALUES ('$payment_date', '$amount', '$comment')");
                 }
             }
             
@@ -44,13 +61,44 @@ if(isset($_POST['importSubmit'])){
             fclose($csvFile);
             
             $qstring = '?status=succ';
+            header("Location: output.php".$qstring);
+            exit();
+            
         }else{
             $qstring = '?status=err';
+            header("Location: output.php".$qstring);
+            exit();
         }
     }else{
         $qstring = '?status=invalid_file';
+        header("Location: index.php".$qstring);
+        exit();
+    }
+
+    // Redirect to the listing page
+    header("Location: output.php".$qstring);
+    exit();
+}
+else if ($_POST['action'] == 'EXPORTOVANÉ') {
+    if ($_SERVER['REQUEST_METHOD']== "POST") {
+    
+        if ($_POST['password'] == $universal_password) {
+            header("Location: output.php");
+            exit();
+        }
+        else {
+            $qstring = '?status=nopass';
+            header("Location: index.php".$qstring);
+            exit();
+        }
     }
 }
+else {
+    $qstring = '?status=err';
+        header("Location: output.php".$qstring);
+        exit();
+}
+}
 
-// Redirect to the listing page
-header("Location: output.php".$qstring);
+
+?>
