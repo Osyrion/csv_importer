@@ -1,6 +1,6 @@
 <?php
 
-$basePath = "http://127.0.0.1/exporter_csv";
+$basePath = "//127.0.0.1/exporter_csv";
 
 // Database configuration
 $dbHost     = "127.0.0.1";
