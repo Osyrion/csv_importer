@@ -21,7 +21,7 @@ if(!empty($_GET['status'])){
             $statusType = "alert-danger text-center";
             $statusMsg = 'Zadejte správne heslo!';
             break;
-        case 'nopass':
+        case 'filesize':
             $statusType = "alert-danger text-center";
             $statusMsg = 'Soubor je příliš velký!';
             break;
@@ -58,7 +58,7 @@ if(!empty($_GET['status'])){
                     <form class="col-sm-10 offset-sm-1" action="importData.php" method="post" enctype="multipart/form-data">
                         <div class="form-group">
                             <div class="custom-file">
-                                <input type="file" name="file" class="custom-file-input" id="csvFile" aria-describedby="csvFile" accept=".csv" />
+                                <input type="file" name="file" class="custom-file-input" id="csvFile" aria-describedby="csvFile" accept=".csv" onMouseOut="Upload()" />
                                 <label class="custom-file-label" for="csvFile" data-browse="max 5 MB">Vyberte CSV soubor</label>
                             </div>
                         </div>
@@ -71,7 +71,7 @@ if(!empty($_GET['status'])){
                         <div class="form-group">
                             <div class="btn-group btn-block" role="group" aria-label="export group">
                                 <input type="submit" class="btn btn-success col-sm-6" value="EXPORTOVANÉ" name="action" />
-                                <input type="submit" class="btn btn-primary col-sm-6" value="EXPORT" name="action" onMouseOver="Upload()" id="submit" />
+                                <input type="submit" class="btn btn-primary col-sm-6" value="EXPORT" name="action" id="submit" />
                             </div>
                         </div>
                     </form>
@@ -82,6 +82,11 @@ if(!empty($_GET['status'])){
                     </div>
                     
                     <?php } ?>
+                    <div class="col-sm-10 offset-sm-1">
+                        <div class="d-none" id="fileSizeToggle">
+                            <div class="alert alert-danger text-center">Soubor je příliš velký!</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,15 +100,24 @@ if(!empty($_GET['status'])){
         nextSibling.innerText = fileName
     })
 
-    
     function Upload() {
+        const input = document.getElementsByName('action');
         var fileUpload = document.getElementById("csvFile");
         if (typeof (fileUpload.files) != "undefined") {
             var size = parseFloat(fileUpload.files[0].size / 1024 / 1024).toFixed(2);
-            alert("Soubor je příliš velký!");
+            if (size > 2) {
+                input[0].disabled = true;
+                input[1].disabled = true;
+                document.getElementById("fileSizeToggle").className = 'd-block';
+            } 
+            else {
+                input[0].disabled = false;
+                input[1].disabled = false;
+                document.getElementById("fileSizeToggle").className = 'd-none';
+            }
+            
         } 
     }
-    
 </script>
 
 </body>

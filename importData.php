@@ -9,21 +9,32 @@ if($_POST && isset($_POST['action'])){
 
 if ($_POST['action'] == 'EXPORT') {
     if ($_SERVER['REQUEST_METHOD']== "POST") {
-
+        // CHECH FOR PASSWORD
         if ($_POST['password'] != $universal_password) {
             $qstring = '?status=nopass';
             header("Location: index.php".$qstring);
             exit();
         }
+
+        // CHECK FOR FILE SIZE
+        $file = $_FILES['file'];
+
+        // MAX 5 MB
+        if(isset($_FILES['file'])) {
+            if($file['size'] > 5242880) { //5 MB (size is also in bytes)
+                $qstring = '?status=filesize';
+                header("Location: index.php".$qstring);
+                exit();
+            }
+        }       
     }
 
     // Allowed mime types
     $csvMimes = array('text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain');
     
-
     // Validate whether selected file is a CSV file
     if(!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMimes)){
-
+      
         // If the file is uploaded
         if(is_uploaded_file($_FILES['file']['tmp_name'])){
             
