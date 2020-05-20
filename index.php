@@ -21,6 +21,10 @@ if(!empty($_GET['status'])){
             $statusType = "alert-danger text-center";
             $statusMsg = 'Zadejte správne heslo!';
             break;
+        case 'nopass':
+            $statusType = "alert-danger text-center";
+            $statusMsg = 'Soubor je příliš velký!';
+            break;
         default:
             $statusType = '';
             $statusMsg = '';
@@ -36,9 +40,8 @@ if(!empty($_GET['status'])){
     <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-
+    <!-- CSS STYLE -->
+    <link rel="stylesheet" href="<?php echo $basePath . "/css/bootstrap.min.css"?>">
 
     <title>Export CSV</title>
 </head>
@@ -56,7 +59,7 @@ if(!empty($_GET['status'])){
                         <div class="form-group">
                             <div class="custom-file">
                                 <input type="file" name="file" class="custom-file-input" id="csvFile" aria-describedby="csvFile" accept=".csv" />
-                                <label class="custom-file-label" for="csvFile" data-browse="Procházet">Vyberte CSV soubor</label>
+                                <label class="custom-file-label" for="csvFile" data-browse="max 5 MB">Vyberte CSV soubor</label>
                             </div>
                         </div>
                         <div class="form-group">
@@ -68,7 +71,7 @@ if(!empty($_GET['status'])){
                         <div class="form-group">
                             <div class="btn-group btn-block" role="group" aria-label="export group">
                                 <input type="submit" class="btn btn-success col-sm-6" value="EXPORTOVANÉ" name="action" />
-                                <input type="submit" class="btn btn-primary col-sm-6" value="EXPORT" name="action" />
+                                <input type="submit" class="btn btn-primary col-sm-6" value="EXPORT" name="action" onMouseOver="Upload()" id="submit" />
                             </div>
                         </div>
                     </form>
@@ -77,6 +80,7 @@ if(!empty($_GET['status'])){
                     <div class="col-sm-10 offset-sm-1">
                         <div class="alert <?php echo $statusType; ?>"><?php echo $statusMsg; ?></div>
                     </div>
+                    
                     <?php } ?>
                 </div>
             </div>
@@ -84,12 +88,22 @@ if(!empty($_GET['status'])){
     </div>
 </div>
 
-<script>
+<script type="text/javascript">
     document.querySelector('.custom-file-input').addEventListener('change',function(e){
         var fileName = document.getElementById("csvFile").files[0].name;
         var nextSibling = e.target.nextElementSibling
         nextSibling.innerText = fileName
     })
+
+    
+    function Upload() {
+        var fileUpload = document.getElementById("csvFile");
+        if (typeof (fileUpload.files) != "undefined") {
+            var size = parseFloat(fileUpload.files[0].size / 1024 / 1024).toFixed(2);
+            alert("Soubor je příliš velký!");
+        } 
+    }
+    
 </script>
 
 </body>

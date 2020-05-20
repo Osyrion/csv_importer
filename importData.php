@@ -5,8 +5,7 @@ include_once 'config.php';
 // UNIVERSAL PASSWORD FOR IMPORT FILE TO DB
 $universal_password = "1234";
 
-
-if(isset($_POST['action'])){
+if($_POST && isset($_POST['action'])){
 
 if ($_POST['action'] == 'EXPORT') {
     if ($_SERVER['REQUEST_METHOD']== "POST") {
@@ -17,12 +16,14 @@ if ($_POST['action'] == 'EXPORT') {
             exit();
         }
     }
+
     // Allowed mime types
     $csvMimes = array('text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain');
     
+
     // Validate whether selected file is a CSV file
     if(!empty($_FILES['file']['name']) && in_array($_FILES['file']['type'], $csvMimes)){
-        
+
         // If the file is uploaded
         if(is_uploaded_file($_FILES['file']['tmp_name'])){
             
