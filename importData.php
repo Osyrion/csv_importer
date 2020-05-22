@@ -9,7 +9,7 @@ if($_POST && isset($_POST['action'])){
 
 if ($_POST['action'] == 'EXPORT') {
     if ($_SERVER['REQUEST_METHOD']== "POST") {
-        // CHECH FOR PASSWORD
+        // CHECK FOR PASSWORD
         if ($_POST['password'] != $universal_password) {
             $qstring = '?status=nopass';
             header("Location: index.php".$qstring);
@@ -50,23 +50,43 @@ if ($_POST['action'] == 'EXPORT') {
                 // COLUMNS
                 $payment_date = $data[13];
                 $amount = $data[33];
+                $transactionNumber = $data[8];
+                $matches = array();
+                //$countMatches = 0;
+                /*
+                function get_match($regex,$content)
+{
+    if (preg_match($regex,$content,$matches)) {
+        return $matches[0];
+    } else {
+        return null;
+    }
+}
+                */
+                $comments = $data[11] . " " . $data[23] . " " . $data[24] . " " . $data[25];
 
                 // CHECKING ENCODING
                 $check_encoding = mb_detect_encoding($data[11], 'auto');
 
                 if (mb_check_encoding($data, 'utf-8')) {
                     // USE THIS IF CSV IS ALREADY IN UTF-8
-                    $comment = $data[11];
+                    $comment = $comments;
                 }
                 else {
                     // CONVERT TO UTF-8
-                    $comment = iconv($check_encoding, 'utf-8', $data[11]);
+                    $comment = iconv($check_encoding, 'utf-8//TRANSLIT', $comments);
                 }
                 
                 // CHECKING IF AMOUNT IS NOT 0
-                if ($amount != 0) {
-                    $db->query("INSERT INTO CSV_IMPORT (payment_date, amount, comment) VALUES ('$payment_date', '$amount', '$comment')");
+                if ($amount != 0 && is_numeric($amount)) {
+                    
+                    preg_match('/Trn:\s[[:alnum:]]\s/', $transactionNumber, $matches);
+                    
+                    if (!($db->query("SELECT COUNT(*) FROM CSV_IMPORT WHERE TRANSACTION_NUMBER = $matches"))) {
+                        $db->query("INSERT INTO CSV_IMPORT (payment_date, amount, comment) VALUES ('$payment_date', '$amount', '$comment')");
+                    }
                 }
+                
             }
             
             // Close opened CSV file

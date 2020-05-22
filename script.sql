@@ -7,6 +7,7 @@ CREATE DATABASE testdb CHARACTER SET utf8;
 -- CREATE TABLE
 CREATE TABLE CSV_IMPORT (
     id int NOT NULL AUTO_INCREMENT,
+    transaction_number int NOT NULL,
     payment_date varchar(255),
     amount float NOT NULL,
     comment varchar(255),
