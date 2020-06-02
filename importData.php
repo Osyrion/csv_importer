@@ -9,7 +9,7 @@ if($_POST && isset($_POST['action'])){
 
 if ($_POST['action'] == 'EXPORT') {
     if ($_SERVER['REQUEST_METHOD']== "POST") {
-        // CHECH FOR PASSWORD
+        // CHECK FOR PASSWORD
         if ($_POST['password'] != $universal_password) {
             $qstring = '?status=nopass';
             header("Location: index.php".$qstring);
@@ -48,25 +48,46 @@ if ($_POST['action'] == 'EXPORT') {
             while(($data = fgetcsv($csvFile, 1000, ";")) !== FALSE){
 
                 // COLUMNS
-                $payment_date = $data[13];
                 $amount = $data[33];
 
-                // CHECKING ENCODING
-                $check_encoding = mb_detect_encoding($data[11], 'auto');
+                // CHECKING IF AMOUNT IS NOT 0
+                if ($amount != 0 && is_numeric($amount)) {
 
-                if (mb_check_encoding($data, 'utf-8')) {
-                    // USE THIS IF CSV IS ALREADY IN UTF-8
-                    $comment = $data[11];
-                }
-                else {
-                    // CONVERT TO UTF-8
-                    $comment = iconv($check_encoding, 'utf-8', $data[11]);
+                    $payment_date = $data[13];
+                    $comments = $data[11] . " " . $data[23] . " " . $data[24] . " " . $data[25];
+                    $transaction_hash = sha1($data[8]);
+
+                    // CHECK FOR DUPLICITY
+                    if ($transaction_hash != NULL) {
+                        if ($result = mysqli_query($link, "SELECT transaction_hash FROM csv_import WHERE transaction_hash = '$transaction_hash'"))
+                        {
+                            $check_hash = mysqli_num_rows($result);
+                            mysqli_free_result($result);
+                        }
+                    }
+                    else {
+                        $check_hash = 1;
+                    } 
+                    
+                    // CHECKING ENCODING
+                    $check_encoding = mb_detect_encoding($comments, 'auto');
+
+                    if (mb_check_encoding($comments, 'utf-8') == 'UTF-8') {
+
+                        // USE THIS IF CSV IS ALREADY IN UTF-8
+                        $comment = $comments;
+                    }
+                    else {
+
+                        // CONVERT TO UTF-8
+                        $comment = iconv($check_encoding, 'utf-8//TRANSLIT', $comments);
+                    }
+                
+                    if ($check_hash == 0) {
+                        $db->query("INSERT INTO CSV_IMPORT (transaction_hash, payment_date, amount, comment) VALUES ('$transaction_hash', '$payment_date', '$amount', '$comment')");
+                    }
                 }
                 
-                // CHECKING IF AMOUNT IS NOT 0
-                if ($amount != 0) {
-                    $db->query("INSERT INTO CSV_IMPORT (payment_date, amount, comment) VALUES ('$payment_date', '$amount', '$comment')");
-                }
             }
             
             // Close opened CSV file
