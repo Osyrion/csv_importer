@@ -1,6 +1,5 @@
 <?php
 include_once 'config.php';
-
 ?>
 
 <table id="tablepress-1" class="tablepress tablepress-id-1">

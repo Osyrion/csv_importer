@@ -59,7 +59,7 @@ if(!empty($_GET['status'])){
                         <div class="form-group">
                             <div class="custom-file">
                                 <input type="file" name="file" class="custom-file-input" id="csvFile" aria-describedby="csvFile" accept=".csv" onMouseOut="Upload()" />
-                                <label class="custom-file-label" for="csvFile" data-browse="max 5 MB">Vyberte CSV soubor</label>
+                                <label class="custom-file-label" for="csvFile" data-browse="max 2 MB">Vyberte CSV soubor</label>
                             </div>
                         </div>
                         <div class="form-group">
